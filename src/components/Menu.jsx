@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { VscChromeClose } from "react-icons/vsc";
+import { useNavigate } from 'react-router-dom';
 
 const MenuWrapper = styled.div`
     position: absolute;
@@ -53,6 +54,25 @@ const Off = styled(VscChromeClose)`
 `
 
 const Menu = ({ handleLogout, username, onClose }) => { // onClose prop 추가
+    const home = useNavigate();
+    const clickhome = () => {
+        home('/');
+    }
+
+    const popular = useNavigate();
+    const clickpopular = () => {
+        popular('/popular');
+    }
+
+    const search = useNavigate();
+    const clicksearch = () => {
+        search('/search');
+    }
+
+    const wishlist = useNavigate();
+    const clickwishlist = () => {
+        wishlist('/wishlist');
+    }
     return (
         <MenuWrapper>
             <Off onClick={onClose} /> {/* Off 버튼 클릭 시 Menu 닫기 */}
@@ -62,9 +82,10 @@ const Menu = ({ handleLogout, username, onClose }) => { // onClose prop 추가
                         님 환영합니다!
                     </p>
                 </Username>
-                <Menuitem>대세 콘텐츠</Menuitem>
-                <Menuitem>찾아보기</Menuitem>
-                <Menuitem>내가 찜한 리스트</Menuitem>
+                <Menuitem onClick={clickhome}>홈</Menuitem>
+                <Menuitem onClick={clickpopular}>대세 콘텐츠</Menuitem>
+                <Menuitem onClick={clicksearch}>찾아보기</Menuitem>
+                <Menuitem onClick={clickwishlist}>내가 찜한 리스트</Menuitem>
                 <Menuitem onClick={handleLogout}>로그아웃</Menuitem>
             </Menulist>
         </MenuWrapper>

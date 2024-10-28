@@ -10,7 +10,7 @@ const SectionWrapper = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    margin-top: 0px;
+    margin-top: 10px;
 `;
 
 const ContentWrapper = styled.div`
@@ -63,6 +63,7 @@ const Wrapper = styled.div`
     padding: 0;
     position: absolute;
     top: 200px;
+    background-color: transparent;
     @media screen and (min-width: 768px) {
         top: 200px;
         margin-left: 80px;
@@ -75,6 +76,7 @@ const Title = styled.p`
     color: white;
     margin: 0;
     font: bold 30px 'arial';
+    background-color: transparent;
     @media screen and (min-width: 768px) {
         font-size: 50px;
     }
@@ -84,6 +86,7 @@ const Info = styled.p`
     margin: 20px 0;
     color: white;
     font: bold 14px 'arial';
+    background-color: transparent;
     @media screen and (min-width: 768px) {
         font-size: 17px;
     }
