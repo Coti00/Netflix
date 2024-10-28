@@ -10,6 +10,7 @@ const MenuWrapper = styled.div`
     z-index: 999;
     right: 0;
     top: 10px;
+    border-radius: 5px;
 `;
 
 const Menulist = styled.div`
