@@ -167,7 +167,7 @@ const MainSection = ({ movies, title }) => {
         // 5초마다 자동으로 슬라이드 이동
         const autoSlide = setInterval(() => {
             handleNext();
-        }, 5000);
+        }, 10000);
 
         return () => {
             window.removeEventListener("resize", handleResize);
