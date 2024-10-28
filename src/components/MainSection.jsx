@@ -78,14 +78,10 @@ const P = styled.p`
     padding: 0;
     background-color: transparent;
     &.overview {
-        margin: 10px 5px 10px 5px;
+        margin: 15px 5px 10px 5px;
         font: 500 12px 'arial';
     }
     &.vote {
-        margin-top: 5px;
-        font: 400 11px 'arial';
-    }
-    &.date {
         margin-top: 5px;
         font: 400 11px 'arial';
     }
@@ -229,7 +225,6 @@ const MainSection = ({ movies, title }) => {
                     <Content style={{ display: contentVisible[currentIndex + index] ? 'flex' : 'none' }}>
                         <P className="overview">{movie.overview}</P>
                         <P className="vote">평점: {movie.vote_average} / 10</P>
-                        <P className="date">개봉일: {movie.release_date}</P>
                     </Content>
                 </ContentWrapper>
                 <DetailButton onClick={(e) => {
