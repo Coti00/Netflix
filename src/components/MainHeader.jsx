@@ -1,102 +1,145 @@
-// MainSection.jsx
-import React, { useState, useEffect } from "react";
+// MainHeader.jsx
+import React,{useEffect, useState} from "react";
 import styled from "styled-components";
-import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import axios from "axios";
 
 const SectionWrapper = styled.div`
-    width: calc(100%);
+    width: calc(95%);
     height: auto;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     margin-top: 0px;
 `;
 
 const ContentWrapper = styled.div`
     width: 100%;
-    height: 350px; /* 고정 높이 설정 */
+    height: 400px; /* 고정 높이 설정 */
     overflow: hidden; /* 오버플로우 숨기기 */
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    position: relative;
+    @media screen and (min-width: 768px) {
+        height: 500px;
+        object-fit: cover;
+        width: 100%;
+    }
 `;
 
 const Img = styled.img`
-    width: calc(100%);
+    width: auto;
     height: 100%;
     margin: 0;
     padding: 0;
-    position: relative; /* 절대 위치로 설정 */
-    transition: opacity 0.3s ease; /* 부드러운 효과를 위한 transition */
+    @media screen and (min-width: 768px) {
+        width: 100%;
+    }
 `;
 
-const ButtonWrapper = styled.div`
+const Button = styled.div`
+    width: 150px;
+    height: 40px;
+    margin: 5px 0;
+    border-radius: 5px;
+    background: #e13955;
+    font: bold 14px 'arial';
+    text-align: center;
+    line-height: 40px;
+    color: white;
+    &.info{
+        bottom: 55%;
+        margin-bottom: 10px;
+        background: gray;
+    }
+`
+
+const Wrapper = styled.div`
     display: flex;
-    justify-content: space-between;
-    width: 100%; /* 버튼을 전체 너비로 설정 */
-    margin-top: 0;
-    align-items: center;
-`;
-
-const LeftButton = styled(FaChevronLeft)`
-    color: #e13955;
-    width: 20px;
-    height: 20px;
+    flex-direction: column;
+    margin: 0 20px;
+    padding: 0;
     position: absolute;
-    z-index: 10;
-    &:hover {
-        color: gray;
-        cursor: pointer;
+    top: 200px;
+    @media screen and (min-width: 768px) {
+        top: 200px;
+        margin-left: 80px;
+        width: calc(30%);
+        left: 0;
     }
-`;
+`
 
-const RightButton = styled(FaChevronRight)`
-    color: #e13955;
-    width: 20px;
-    height: 20px;
-    position: absolute;
-    z-index: 10;
-    right: 0;
-    &:hover {
-        color: gray;
-        cursor: pointer;
+const Title = styled.p`
+    color: white;
+    margin: 0;
+    font: bold 30px 'arial';
+    @media screen and (min-width: 768px) {
+        font-size: 50px;
     }
-`;
+`
 
-const MainSection = ({ movies }) => {
-    const [currentIndex, setCurrentIndex] = useState(0); // 현재 슬라이드 인덱스 관리
+const Info = styled.p`
+    margin: 20px 0;
+    color: white;
+    font: bold 14px 'arial';
+    @media screen and (min-width: 768px) {
+        font-size: 17px;
+    }
+`
+
+const MainHeader = ({ movies }) => {
+    const [images, setImages] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length); // 다음 영화로 이동
-        }, 5000); // 1초마다 슬라이드 변경
+        const options = {
+            headers: {
+                accept: 'application/json',
+                Authorization: `Bearer ${process.env.REACT_APP_ACCESS}` // 환경 변수를 사용하여 인증
+            }
+        };
 
-        return () => clearInterval(interval); // 컴포넌트 언마운트 시 interval 정리
-    }, [movies.length]); // 영화 목록의 길이에 따라 의존성 배열
+        const fetchImages = async () => {
+            try {
+                const response = await axios.get('https://api.themoviedb.org/3/movie/912649/images', options);
+                setImages(response.data.backdrops); // backdrops 배열을 상태에 저장
+                setLoading(false); // 로딩 완료
+            } catch (err) {
+                console.error(err);
+                setLoading(false); // 에러 발생 시에도 로딩 완료
+            }
+        };
 
-    const handleNext = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length); // 다음 영화로 이동
-    };
+        fetchImages();
+    }, []);
 
-    const handlePrev = () => {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + movies.length) % movies.length); // 이전 영화로 이동
-    };
+    if (loading) {
+        return <p>Loading...</p>; // 데이터를 가져오는 동안 로딩 메시지 표시
+    }
+
+    // 첫 번째 이미지 선택
+    const firstImage = images.length > 0 ? images[6] : null;
+
+    const selectedMovie = movies.find(movie => movie.id === 912649);
 
     return (
         <SectionWrapper>
-            <ButtonWrapper>
-                <LeftButton onClick={handlePrev} />
                 <ContentWrapper>
-                    <Img 
-                        src={`https://image.tmdb.org/t/p/w500${movies[currentIndex].poster_path}`} 
-                        alt={movies[currentIndex].title} 
-                    />
+                        {firstImage ? (<Img 
+                            src={`https://image.tmdb.org/t/p/w500${firstImage.file_path}`} 
+                            alt={selectedMovie.title} 
+                        />): (<p>이미지를 찾을 수 없습니다</p>)}
                 </ContentWrapper>
-                <RightButton onClick={handleNext} />
-            </ButtonWrapper>
+                <Wrapper>
+                    <Title>{selectedMovie.title}</Title>
+                    <Info>{selectedMovie.overview}</Info>
+                    <Button>재생</Button>
+                    <Button className="info">상세 정보</Button>
+                </Wrapper>
         </SectionWrapper>
     );
 };
 
-export default MainSection;
+export default MainHeader;

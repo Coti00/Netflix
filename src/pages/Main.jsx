@@ -62,7 +62,7 @@ const Main = () => {
         <>
             <Header />
             <Container>
-                <MainHeader title="현재 상영 중 영화" movies={movies[3]} /> {/* 네 번째 API: 현재 상영 중 영화 */}
+                <MainHeader movies={movies[3]} /> {/* 네 번째 API: 현재 상영 중 영화 */}
                 <MainSection title="인기 영화" movies={movies[0]} /> {/* 첫 번째 API: 인기 영화 */}
                 <MainSection title="개봉 예정 영화" movies={movies[1]} /> {/* 두 번째 API: 개봉 예정 영화 */}
                 <MainSection title="최고 평점 영화" movies={movies[2]} /> {/* 세 번째 API: 최고 평점 영화 */}
