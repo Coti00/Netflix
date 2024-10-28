@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import axios from 'axios';
 import MainSection from "../components/MainSection"; // MainSection 임포트
 import MainHeader from "../components/MainHeader";
+import Loading from "../components/Loading";
 
 const Container = styled.div`
     width: calc(100%);
@@ -16,7 +17,7 @@ const Container = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding-bottom: 50px;
+    padding-bottom: 80px;
 `;
 
 const Main = () => {
@@ -55,7 +56,7 @@ const Main = () => {
     }, []); // 컴포넌트가 처음 렌더링될 때만 호출
 
     if (loading) {
-        return <div>로딩 중...</div>; // 로딩 중일 때 표시할 메시지
+        return <Loading/>; // 로딩 중일 때 표시할 메시지
     }
 
     return (

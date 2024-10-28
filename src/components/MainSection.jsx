@@ -1,8 +1,8 @@
 // MainSection.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { FaRedoAlt } from "react-icons/fa";
+import { FaStar } from "react-icons/fa6";
 
 const SectionWrapper = styled.div`
     width: calc(70%);
@@ -12,6 +12,9 @@ const SectionWrapper = styled.div`
     align-items: center;
     justify-content: center;
     margin-top: 30px;
+    @media screen and (min-width: 768px) {
+        width: calc(80%);
+    }
 `;
 
 const Title = styled.p`
@@ -38,6 +41,9 @@ const ContentWrapper = styled.div`
         transform: scale(1.05); /* hover 시 이미지 크기 증가 */
         box-shadow: 0px 4px 8px #e9a6b1, 0px 6px 20px #ea8e9d;
     }
+    @media screen and (min-width: 768px) {
+        margin: 0 10px;
+    }
 `;
 
 const Img = styled.img`
@@ -48,7 +54,6 @@ const Img = styled.img`
     padding: 0;
     position: absolute; /* 절대 위치로 설정 */
     transition: transform 0.3s ease; /* 부드러운 효과를 위한 transition */
-    
 `;
 
 const Content = styled.div`
@@ -112,33 +117,114 @@ const RightButton = styled(FaChevronRight)`
     }
 `;
 
-const Flip = styled(FaRedoAlt)`
-    color: #e13955;
-    position: absolute; /* 절대 위치로 설정 */
-    bottom: 10px; /* 이미지 하단에서 10px 위치 */
-    left: 50%;
-    width: 20px;
-    height: 20px;
-    transform: translateX(-50%); /* 중앙 정렬 */
-    cursor: pointer; /* 커서 포인터로 변경 */
+const DetailButton = styled.button`
+    background-color: #e13955;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 10px;
+
+    &:hover {
+        background-color: #c82c45;
+    }
+`;
+
+const Star = styled(FaStar)`
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: gold;
+    font-size: 20px;
 `;
 
 const MainSection = ({ movies, title }) => {
-    const [currentIndex, setCurrentIndex] = useState(0); // 현재 슬라이드 인덱스 관리
-    const [contentVisible, setContentVisible] = useState(false); // Content 가시성 관리
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [contentVisible, setContentVisible] = useState(Array(movies.length).fill(false));
+    const [isWideScreen, setIsWideScreen] = useState(window.innerWidth >= 768);
+    const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem('wishlist')) || []);
+
+    useEffect(() => {
+        const handleResize = () => {
+            setIsWideScreen(window.innerWidth >= 768);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
 
     const handleNext = () => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % movies.length); // 다음 영화로 이동
-        setContentVisible(false); // 다음 슬라이드로 이동할 때 Content 숨김
+        setCurrentIndex((prevIndex) => {
+            const nextIndex = prevIndex + 1;
+            return nextIndex >= movies.length ? 0 : nextIndex; // 슬라이드가 끝나면 처음으로 돌아감
+        });
+        setContentVisible(Array(movies.length).fill(false)); // 모든 컨텐츠 숨김
     };
 
     const handlePrev = () => {
-        setCurrentIndex((prevIndex) => (prevIndex - 1 + movies.length) % movies.length); // 이전 영화로 이동
-        setContentVisible(false); // 이전 슬라이드로 이동할 때 Content 숨김
+        setCurrentIndex((prevIndex) => {
+            const nextIndex = prevIndex - 1;
+            return nextIndex < 0 ? movies.length - 1 : nextIndex; // 슬라이드가 처음에 도달하면 마지막으로 이동
+        });
+        setContentVisible(Array(movies.length).fill(false)); // 모든 컨텐츠 숨김
     };
 
-    const handleFlip = () => {
-        setContentVisible((prevVisible) => !prevVisible); // Content 가시성 토글
+    const handleDetailClick = (index) => {
+        setContentVisible((prevVisible) => {
+            const newVisible = [...prevVisible];
+            newVisible[index] = !newVisible[index]; // 클릭한 요소만 토글
+            return newVisible;
+        });
+    };
+
+    const handleAddToWishlist = (movie) => {
+        const movieExists = wishlist.find(item => item.id === movie.id);
+
+        if (!movieExists) {
+            const updatedWishlist = [...wishlist, movie];
+            setWishlist(updatedWishlist);
+            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+            alert(`${movie.title}이(가) 위시리스트에 추가되었습니다!`);
+        } else {
+            const updatedWishlist = wishlist.filter(item => item.id !== movie.id);
+            setWishlist(updatedWishlist);
+            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+            alert(`${movie.title}이(가) 위시리스트에서 제거되었습니다!`);
+        }
+    };
+
+    const renderMovies = () => {
+        const moviesToShow = isWideScreen
+            ? movies.slice(currentIndex, currentIndex + 4) // 현재 인덱스부터 4개 영화 가져오기
+            : [movies[currentIndex]]; // 작은 화면에서는 현재 영화만 표시
+
+        return moviesToShow.map((movie, index) => (
+            <ContentWrapper key={index} onClick={() => handleAddToWishlist(movie)}>
+                <Img 
+                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                    alt={movie.title} 
+                />
+                {wishlist.some(item => item.id === movie.id) && (
+                    <Star /> // 위시리스트에 있는 경우 스타 표시
+                )}
+                <Content style={{ display: contentVisible[currentIndex + index] ? 'flex' : 'none' }}>
+                    <Title className="movieTitle">{movie.title}</Title>
+                    <P className="overview">{movie.overview}</P>
+                    <P className="vote">평점: {movie.vote_average} / 10</P>
+                    <P className="date">개봉일: {movie.release_date}</P>
+                </Content>
+                <DetailButton onClick={(e) => {
+                    e.stopPropagation(); // 부모 요소의 클릭 이벤트 방지
+                    handleDetailClick(currentIndex + index);
+                }}>
+                    상세보기
+                </DetailButton>
+            </ContentWrapper>
+        ));
     };
 
     return (
@@ -146,20 +232,9 @@ const MainSection = ({ movies, title }) => {
             <Title>{title}</Title>
             <ButtonWrapper>
                 <LeftButton onClick={handlePrev} />
-                <ContentWrapper>
-                    <Img 
-                        src={`https://image.tmdb.org/t/p/w500${movies[currentIndex].poster_path}`} 
-                        alt={movies[currentIndex].title} 
-                    />
-                    <Content style={{ display: contentVisible ? 'flex' : 'none' }}>
-                        <Title className="movieTitle">{movies[currentIndex].title}</Title>
-                        <P className="overview">{movies[currentIndex].overview}</P> {/* 영화 개요 표시 */}
-                        <P className="vote">평점: {movies[currentIndex].vote_average} / 10</P> {/* 영화 평점 표시 */}
-                        <P className="date">개봉일: {movies[currentIndex].release_date}</P> {/* 영화 개봉일 표시 */}
-                        <Flip onClick={handleFlip} />
-                    </Content>
-                    <Flip onClick={handleFlip} />
-                </ContentWrapper>
+                <div style={{ display: 'flex' }}>
+                    {renderMovies()}
+                </div>
                 <RightButton onClick={handleNext} />
             </ButtonWrapper>
         </SectionWrapper>

@@ -113,6 +113,25 @@ const Header = () => {
     const [menu, setMenu] = useState(false);
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768); // 현재 화면 크기 상태 추가
 
+    const home = useNavigate();
+    const clickhome = () => {
+        home('/');
+    }
+
+    const popular = useNavigate();
+    const clickpopular = () => {
+        home('/popular');
+    }
+
+    const search = useNavigate();
+    const clicksearch = () => {
+        home('/search');
+    }
+
+    const wishlist = useNavigate();
+    const clickwishlist = () => {
+        home('/wishlist');
+    }
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
         if (storedUsername) {
@@ -154,10 +173,10 @@ const Header = () => {
                 <IconName>Dongflix</IconName>
             </IconWrapper>
             <Menulist> {/* 메뉴 상태에 따라 표시 */}
-                <Menuitem>홈</Menuitem>
-                <Menuitem>대세 콘텐츠</Menuitem>
-                <Menuitem>찾아보기</Menuitem>
-                <Menuitem>내가 찜한 리스트</Menuitem>
+                <Menuitem onClick={clickhome}>홈</Menuitem>
+                <Menuitem onClick={clickpopular}>대세 콘텐츠</Menuitem>
+                <Menuitem onClick={clicksearch}>찾아보기</Menuitem>
+                <Menuitem onClick = {clickwishlist}>내가 찜한 리스트</Menuitem>
                 <Username>
                     {username ? `${username}` : '로그인 해주세요'}
                     <p style={{ margin: '0', padding: '0', fontSize: '10px', paddingTop: '5px', marginLeft: '3px', color: 'white' }}>

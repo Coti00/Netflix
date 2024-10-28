@@ -10,7 +10,7 @@ const SectionWrapper = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    margin-top: 0px;
+    margin-top: 10px;
 `;
 
 const ContentWrapper = styled.div`
