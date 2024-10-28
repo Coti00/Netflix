@@ -23,6 +23,9 @@ const MenuWrapper = styled.div`
 const IconWrapper = styled.div`
     display: flex;
     align-items: center;
+    &:hover{
+        cursor: pointer;
+    }
 `;
 
 const IconName = styled.p`
@@ -120,17 +123,17 @@ const Header = () => {
 
     const popular = useNavigate();
     const clickpopular = () => {
-        home('/popular');
+        popular('/popular');
     }
 
     const search = useNavigate();
     const clicksearch = () => {
-        home('/search');
+        search('/search');
     }
 
     const wishlist = useNavigate();
     const clickwishlist = () => {
-        home('/wishlist');
+        wishlist('/wishlist');
     }
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -168,7 +171,7 @@ const Header = () => {
 
     return (
         <MenuWrapper>
-            <IconWrapper>
+            <IconWrapper onClick={clickhome}>
                 <MovieIcon />
                 <IconName>Dongflix</IconName>
             </IconWrapper>

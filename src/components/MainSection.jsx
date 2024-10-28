@@ -12,6 +12,7 @@ const SectionWrapper = styled.div`
     align-items: center;
     justify-content: center;
     margin-top: 30px;
+    margin-bottom: 20px;
     @media screen and (min-width: 768px) {
         width: calc(80%);
     }
@@ -23,15 +24,16 @@ const Title = styled.p`
     margin: 0;
     padding: 0;
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    background-color: transparent;
     &.movieTitle {
         color: #e13955;
     }
 `;
 
 const ContentWrapper = styled.div`
-    width: 250px;
-    height: 350px; /* 고정 높이 설정 */
+    width: 200px;
+    height: 300px; /* 고정 높이 설정 */
     position: relative; /* 자식 요소의 절대 위치에 대한 기준 설정 */
     overflow: hidden; /* 오버플로우 숨기기 */
     display: flex;
@@ -74,17 +76,18 @@ const Content = styled.div`
 const P = styled.p`
     margin: 0;
     padding: 0;
+    background-color: transparent;
     &.overview {
-        margin: 20px 10px 0 10px;
-        font: 500 13px 'arial';
+        margin: 10px 5px 10px 5px;
+        font: 500 12px 'arial';
     }
     &.vote {
-        margin-top: 10px;
-        font: 400 12px 'arial';
+        margin-top: 5px;
+        font: 400 11px 'arial';
     }
     &.date {
         margin-top: 5px;
-        font: 400 12px 'arial';
+        font: 400 11px 'arial';
     }
 `;
 
@@ -125,7 +128,8 @@ const DetailButton = styled.button`
     padding: 5px 10px;
     cursor: pointer;
     margin-top: 10px;
-
+    width: calc(30%);
+    font: bold 13px 'arial';
     &:hover {
         background-color: #c82c45;
     }
@@ -137,6 +141,14 @@ const Star = styled(FaStar)`
     right: 10px;
     color: gold;
     font-size: 20px;
+    background-color: transparent;
+`;
+
+const Wrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;   
 `;
 
 const MainSection = ({ movies, title }) => {
@@ -152,14 +164,20 @@ const MainSection = ({ movies, title }) => {
 
         window.addEventListener("resize", handleResize);
 
+        // 5초마다 자동으로 슬라이드 이동
+        const autoSlide = setInterval(() => {
+            handleNext();
+        }, 5000);
+
         return () => {
             window.removeEventListener("resize", handleResize);
+            clearInterval(autoSlide); // 컴포넌트 언마운트 시 타이머 정리
         };
-    }, []);
+    }, [currentIndex]); // currentIndex가 변경될 때마다 effect를 재실행
 
     const handleNext = () => {
         setCurrentIndex((prevIndex) => {
-            const nextIndex = prevIndex + 1;
+            const nextIndex = isWideScreen ? prevIndex + 5 : prevIndex + 1; // 넓은 화면에서는 다음 4개, 작은 화면에서는 다음 1개로 이동
             return nextIndex >= movies.length ? 0 : nextIndex; // 슬라이드가 끝나면 처음으로 돌아감
         });
         setContentVisible(Array(movies.length).fill(false)); // 모든 컨텐츠 숨김
@@ -167,8 +185,8 @@ const MainSection = ({ movies, title }) => {
 
     const handlePrev = () => {
         setCurrentIndex((prevIndex) => {
-            const nextIndex = prevIndex - 1;
-            return nextIndex < 0 ? movies.length - 1 : nextIndex; // 슬라이드가 처음에 도달하면 마지막으로 이동
+            const nextIndex = isWideScreen ? prevIndex - 5 : prevIndex - 1; // 넓은 화면에서는 이전 4개, 작은 화면에서는 이전 1개로 이동
+            return nextIndex < 0 ? Math.max(0, movies.length - (isWideScreen ? 5 : 1)) : nextIndex; // 슬라이드가 처음에 도달하면 마지막으로 이동
         });
         setContentVisible(Array(movies.length).fill(false)); // 모든 컨텐츠 숨김
     };
@@ -188,42 +206,39 @@ const MainSection = ({ movies, title }) => {
             const updatedWishlist = [...wishlist, movie];
             setWishlist(updatedWishlist);
             localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-            alert(`${movie.title}이(가) 위시리스트에 추가되었습니다!`);
         } else {
             const updatedWishlist = wishlist.filter(item => item.id !== movie.id);
             setWishlist(updatedWishlist);
             localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-            alert(`${movie.title}이(가) 위시리스트에서 제거되었습니다!`);
         }
     };
 
     const renderMovies = () => {
         const moviesToShow = isWideScreen
-            ? movies.slice(currentIndex, currentIndex + 4) // 현재 인덱스부터 4개 영화 가져오기
+            ? movies.slice(currentIndex, currentIndex + 5) // 현재 인덱스부터 4개 영화 가져오기
             : [movies[currentIndex]]; // 작은 화면에서는 현재 영화만 표시
 
         return moviesToShow.map((movie, index) => (
-            <ContentWrapper key={index} onClick={() => handleAddToWishlist(movie)}>
-                <Img 
-                    src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                    alt={movie.title} 
-                />
-                {wishlist.some(item => item.id === movie.id) && (
-                    <Star /> // 위시리스트에 있는 경우 스타 표시
-                )}
-                <Content style={{ display: contentVisible[currentIndex + index] ? 'flex' : 'none' }}>
-                    <Title className="movieTitle">{movie.title}</Title>
-                    <P className="overview">{movie.overview}</P>
-                    <P className="vote">평점: {movie.vote_average} / 10</P>
-                    <P className="date">개봉일: {movie.release_date}</P>
-                </Content>
+            <Wrapper key={index}>
+                <ContentWrapper onClick={() => handleAddToWishlist(movie)}>
+                    <Img 
+                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                        alt={movie.title} 
+                    />
+                    {wishlist.some(item => item.id === movie.id) && <Star />}
+                    <Content style={{ display: contentVisible[currentIndex + index] ? 'flex' : 'none' }}>
+                        <P className="overview">{movie.overview}</P>
+                        <P className="vote">평점: {movie.vote_average} / 10</P>
+                        <P className="date">개봉일: {movie.release_date}</P>
+                    </Content>
+                </ContentWrapper>
                 <DetailButton onClick={(e) => {
                     e.stopPropagation(); // 부모 요소의 클릭 이벤트 방지
                     handleDetailClick(currentIndex + index);
                 }}>
                     상세보기
                 </DetailButton>
-            </ContentWrapper>
+            </Wrapper>
         ));
     };
 
