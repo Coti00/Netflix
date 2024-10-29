@@ -181,10 +181,11 @@ const Popular = () => {
         const fetchMovies = async () => {
             setLoading(true);
             try {
+                const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
                 const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${page}`, {
                     headers: {
                         accept: 'application/json',
-                        Authorization: `Bearer ${process.env.REACT_APP_ACCESS}`
+                        Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
                     }
                 });
                 // 위시리스트 상태를 반영하여 영화 데이터 초기화

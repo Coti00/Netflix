@@ -25,25 +25,26 @@ const Main = () => {
     const [loading, setLoading] = useState(true); // 로딩 상태 관리
 
     useEffect(() => {
+        const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
         const options = {
             headers: {
                 accept: 'application/json',
-                Authorization: `Bearer ${process.env.REACT_APP_ACCESS}` // 환경 변수를 사용하여 인증
+                Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
             }
         };
 
         const fetchMovies = async () => {
             try {
                 const popularResponse = await axios.get('https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1', options);
-                const upcomingResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1', options);
+                const upcomingResponse = await axios.get('https://api.themoviedb.org/3/movie/upcoming?language=ko-KR&page=1', options);
                 const topRatedResponse = await axios.get('https://api.themoviedb.org/3/movie/top_rated?language=ko-KR&page=1', options);
                 const nowPlayingResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1', options);
 
                 setMovies([
                     popularResponse.data.results,
-                    upcomingResponse.data.results,
+                    nowPlayingResponse.data.results, // '현재 상영 영화'는 이제 두 번째로 변경
                     topRatedResponse.data.results,
-                    nowPlayingResponse.data.results
+                    upcomingResponse.data.results // '최고 평점 영화'는 이제 세 번째로 변경
                 ]); // 각각의 API 응답을 상태에 저장
                 setLoading(false); // 로딩 완료
             } catch (err) {
@@ -63,10 +64,10 @@ const Main = () => {
         <>
             <Header />
             <Container>
-                <MainHeader movies={movies[3]} /> {/* 네 번째 API: 현재 상영 중 영화 */}
+                <MainHeader movies={movies[3]} /> {/* 네 번째 API: 개봉 예정 영화 */}
                 <MainSection title="인기 영화" movies={movies[0]} /> {/* 첫 번째 API: 인기 영화 */}
+                <MainSection title="현재 상영 영화" movies={movies[1]} /> {/* 두 번째 API: 현재 상영 영화 */}
                 <MainSection title="최고 평점 영화" movies={movies[2]} /> {/* 세 번째 API: 최고 평점 영화 */}
-                <MainSection title="현재 상영 영화" movies={movies[1]} /> {/* 두 번째 API: 개봉 예정 영화 */}
             </Container>
         </>
     );

@@ -1,4 +1,3 @@
-// MainHeader.jsx
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
@@ -74,7 +73,6 @@ const Info = styled.p`
     }
 `;
 
-
 const ContentWrapper = styled.div`
     margin: 0;
     padding: 0;
@@ -96,10 +94,11 @@ const MainHeader = () => {
     const [selectedMovieIndex, setSelectedMovieIndex] = useState(0);
 
     useEffect(() => {
+        const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
         const options = {
             headers: {
                 accept: 'application/json',
-                Authorization: `Bearer ${process.env.REACT_APP_ACCESS}` // 환경 변수를 사용하여 인증
+                Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
             }
         };
 
@@ -121,10 +120,11 @@ const MainHeader = () => {
     useEffect(() => {
         if (movies.length > 0) {
             const fetchImages = async (id) => {
+                const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
                 const options = {
                     headers: {
                         accept: 'application/json',
-                        Authorization: `Bearer ${process.env.REACT_APP_ACCESS}`
+                        Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
                     }
                 };
 
