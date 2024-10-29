@@ -48,7 +48,7 @@ const MovieIcon = styled(BiSolidCameraMovie)`
 const Menulist = styled.div`
     display: flex;
     align-items: center;
-
+    height: 50px;
     @media screen and (max-width: 768px) {
         display: none; /* 768px 이하에서는 숨김 */
     }

@@ -35,7 +35,7 @@ const Main = () => {
         const fetchMovies = async () => {
             try {
                 const popularResponse = await axios.get('https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=1', options);
-                const upcomingResponse = await axios.get('https://api.themoviedb.org/3/movie/upcoming?language=ko-KR&page=1', options);
+                const upcomingResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1', options);
                 const topRatedResponse = await axios.get('https://api.themoviedb.org/3/movie/top_rated?language=ko-KR&page=1', options);
                 const nowPlayingResponse = await axios.get('https://api.themoviedb.org/3/movie/now_playing?language=ko-KR&page=1', options);
 
@@ -65,8 +65,8 @@ const Main = () => {
             <Container>
                 <MainHeader movies={movies[3]} /> {/* 네 번째 API: 현재 상영 중 영화 */}
                 <MainSection title="인기 영화" movies={movies[0]} /> {/* 첫 번째 API: 인기 영화 */}
-                <MainSection title="개봉 예정 영화" movies={movies[1]} /> {/* 두 번째 API: 개봉 예정 영화 */}
                 <MainSection title="최고 평점 영화" movies={movies[2]} /> {/* 세 번째 API: 최고 평점 영화 */}
+                <MainSection title="현재 상영 영화" movies={movies[1]} /> {/* 두 번째 API: 개봉 예정 영화 */}
             </Container>
         </>
     );
