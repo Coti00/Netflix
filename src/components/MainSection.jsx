@@ -89,30 +89,39 @@ const P = styled.p`
 
 const ButtonWrapper = styled.div`
     display: flex;
-    justify-content: space-between;
-    width: 100%; /* 버튼을 전체 너비로 설정 */
-    margin-top: 0;
+    justify-content: center;
     align-items: center;
+    width: 100%; /* 버튼을 전체 너비로 설정 */
+    margin: 0;
+    padding: 0;
     position: relative; /* 자식 요소의 절대 위치에 대한 기준 설정 */
 `;
 
 const LeftButton = styled(FaChevronLeft)`
-    color: #e13955;
     width: 20px;
     height: 20px;
+    padding: 20px 10px;
+    background-color: black;
+    border-radius: 5px;
+    opacity: 1;
+    color: #e13955;
     &:hover {
-        color: gray;
         cursor: pointer;
+        opacity: 30%;
     }
 `;
 
 const RightButton = styled(FaChevronRight)`
-    color: #e13955;
     width: 20px;
     height: 20px;
+    padding: 20px 10px;
+    border-radius: 5px;
+    background-color: black;
+    opacity: 1;
+    color: #e13955;
     &:hover {
-        color: gray;
         cursor: pointer;
+        opacity: 30%;
     }
 `;
 
@@ -124,10 +133,14 @@ const DetailButton = styled.button`
     padding: 5px 10px;
     cursor: pointer;
     margin-top: 10px;
-    width: calc(30%);
+    width: calc(40%);
+    height: 30px;
     font: bold 13px 'arial';
     &:hover {
         background-color: #c82c45;
+    }
+    @media screen and (min-width: 768px) {
+        width: calc(30%);
     }
 `;
 
@@ -146,6 +159,17 @@ const Wrapper = styled.div`
     justify-content: center;
     align-items: center;   
 `;
+
+const MovieWrapper = styled.div`
+    display: flex;
+    width: calc(100%);
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    overflow-y: visible;
+    padding: 20px 0;
+    justify-content: center;
+`
 
 const MainSection = ({ movies, title }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -242,9 +266,9 @@ const MainSection = ({ movies, title }) => {
             <Title>{title}</Title>
             <ButtonWrapper>
                 <LeftButton onClick={handlePrev} />
-                <div style={{ display: 'flex' }}>
+                <MovieWrapper>
                     {renderMovies()}
-                </div>
+                </MovieWrapper>
                 <RightButton onClick={handleNext} />
             </ButtonWrapper>
         </SectionWrapper>
