@@ -127,6 +127,7 @@ const P = styled.p`
     margin: 0;
     padding: 0;
     margin-top: 20px;
+    background: none;
     &.storelogin {
         margin: 0;
         margin-left: 5px;
