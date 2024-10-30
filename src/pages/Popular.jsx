@@ -6,6 +6,7 @@ import Header from "../components/Header";
 import { FaTableCellsLarge, FaStar } from "react-icons/fa6";
 import { MdKeyboardDoubleArrowDown } from "react-icons/md";
 
+
 const SectionWrapper = styled.div`
     width: calc(100%);
     margin: 50px 0;
