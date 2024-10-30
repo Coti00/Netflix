@@ -53,6 +53,7 @@ const Title = styled.p`
     margin: 20px 0;
     padding: 0;
     margin-top: 40px;
+    background: none;
 `;
 
 const Email = styled.input`
@@ -62,7 +63,7 @@ const Email = styled.input`
     padding-left: 20px;
     border: 1px solid gray;
     margin: 20px 0;
-    background: none;
+    background: transparent;
     color: white;
     &:focus {
         outline: none; 
@@ -101,6 +102,8 @@ const Store = styled.div`
     display: flex;
     width: calc(60%);
     justify-content: center;
+    background: transparent;
+
     &:hover {
         cursor: pointer;
     }
@@ -127,7 +130,7 @@ const P = styled.p`
     margin: 0;
     padding: 0;
     margin-top: 20px;
-    background: none;
+    background: transparent;
     &.storelogin {
         margin: 0;
         margin-left: 5px;

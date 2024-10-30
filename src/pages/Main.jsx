@@ -49,6 +49,7 @@ const Main = () => {
                 setLoading(false); // 로딩 완료
             } catch (err) {
                 console.error(err);
+                alert('API를 불러오지 못했습니다');
                 setLoading(false); // 에러 발생 시에도 로딩 완료
             }
         };

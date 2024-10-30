@@ -74,12 +74,22 @@ const Content = styled.div`
 `;
 
 const P = styled.p`
-    margin: 0;
+    margin:0;
     padding: 0;
     background-color: transparent;
+    &.title{
+        font: bold 17px 'arial';
+        color: #e13955;
+        margin-top: 40px;
+    }
     &.overview {
         margin: 15px 5px 10px 5px;
         font: 500 12px 'arial';
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 7;
     }
     &.vote {
         margin-top: 5px;
@@ -136,6 +146,7 @@ const DetailButton = styled.button`
     width: calc(40%);
     height: 30px;
     font: bold 13px 'arial';
+    z-index: 30;
     &:hover {
         background-color: #c82c45;
     }
@@ -247,6 +258,7 @@ const MainSection = ({ movies, title }) => {
                     />
                     {wishlist.some(item => item.id === movie.id) && <Star />}
                     <Content style={{ display: contentVisible[currentIndex + index] ? 'flex' : 'none' }}>
+                        <P className="title">{movie.title}</P>
                         <P className="overview">{movie.overview}</P>
                         <P className="vote">평점: {movie.vote_average} / 10</P>
                     </Content>
@@ -255,7 +267,7 @@ const MainSection = ({ movies, title }) => {
                     e.stopPropagation(); // 부모 요소의 클릭 이벤트 방지
                     handleDetailClick(currentIndex + index);
                 }}>
-                    상세보기
+                    정보보기
                 </DetailButton>
             </Wrapper>
         ));
