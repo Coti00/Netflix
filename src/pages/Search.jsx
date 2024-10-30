@@ -43,8 +43,8 @@ const ResetButton = styled.button`
     border: none;
     padding: 10px;
     border-radius: 5px;
-    cursor: pointer;
     &:hover {
+        cursor: pointer;
         background-color: #d12945;
     }
 `;
