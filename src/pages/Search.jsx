@@ -17,9 +17,8 @@ const FilterContainer = styled.div`
     width: 80%;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
     margin-bottom: 20px;
 `;
 
@@ -35,6 +34,7 @@ const FilterSelect = styled.select`
     border: none;
     margin-right: 10px;
     color: white;
+    font: 500 14px 'arial';
 `;
 
 const ResetButton = styled.button`
@@ -43,9 +43,13 @@ const ResetButton = styled.button`
     border: none;
     padding: 10px;
     border-radius: 5px;
+    font: bold 10px 'arial';
     &:hover {
         cursor: pointer;
         background-color: #d12945;
+    }
+    @media screen and (min-width: 768px) {
+        font: bold 15px 'arial';
     }
 `;
 
@@ -71,12 +75,25 @@ const MovieCard = styled.div`
 const Poster = styled.img`
     width: 80%;
     border-radius: 5px;
+    &:hover{
+        transform: scale(1.05); 
+    }
 `;
 
 const Title = styled.p`
     color: white;
     text-align: center;
     font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+    background: transparent;
+    font: bold 13px 'arial';
+    @media screen and (min-width: 768px) {
+        font: bold 15px 'arial';
+    }
 `;
 
 const Pagination = styled.div`
@@ -117,13 +134,21 @@ const Star = styled(FaStar)`
 const Search = () => {
     const [movies, setMovies] = useState([]);
     const [filteredMovies, setFilteredMovies] = useState([]);
-    const [genres, setGenres] = useState([]);
     const [selectedGenre, setSelectedGenre] = useState("all");
     const [minRating, setMinRating] = useState(0);
     const [sortBy, setSortBy] = useState("popularity.desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [wishlist, setWishlist] = useState([]);
+
+    // 장르 ID 정의
+    const genreOptions = [
+        { id: 28, name: '액션' }, 
+        { id: 878, name: 'SF' }, 
+        { id: 12, name: '모험' },
+        { id: 16, name: '애니메이션' },
+        { id: 10751, name: '가족영화' }
+    ];
 
     useEffect(() => {
         const fetchMovies = async () => {
@@ -139,11 +164,7 @@ const Search = () => {
                 const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${currentPage}`, options);
                 setMovies(response.data.results);
                 setFilteredMovies(response.data.results);
-                setTotalPages(response.data.total_pages);
-
-                // 장르 정보를 가져오기 위한 추가 API 요청
-                const genresResponse = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?language=ko-KR`, options);
-                setGenres(genresResponse.data.genres);
+                setTotalPages(Math.min(response.data.total_pages, 60)); // 전체 페이지 수가 60으로 제한
             } catch (error) {
                 console.error(error);
             }
@@ -184,6 +205,7 @@ const Search = () => {
         setMinRating(0);
         setSortBy("popularity.desc");
         setFilteredMovies(movies);
+        setCurrentPage(1); // 초기화 시 페이지를 첫 번째로 설정
     };
 
     const handleNextPage = () => {
@@ -225,7 +247,7 @@ const Search = () => {
                     <FilterGroup>
                         <FilterSelect value={selectedGenre} onChange={(e) => setSelectedGenre(e.target.value)}>
                             <option value="all">모든 장르</option>
-                            {genres.map(genre => (
+                            {genreOptions.map(genre => (
                                 <option key={genre.id} value={genre.id}>{genre.name}</option>
                             ))}
                         </FilterSelect>
@@ -249,7 +271,7 @@ const Search = () => {
                 </FilterContainer>
 
                 <TableView>
-                    {filteredMovies.slice(0, 8).map(movie => (
+                    {filteredMovies.map(movie => (
                         <MovieCard key={movie.id}>
                             <Poster 
                                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
