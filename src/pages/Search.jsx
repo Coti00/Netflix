@@ -65,7 +65,7 @@ const MovieCard = styled.div`
     background: #3c3c3c;
     border-radius: 5px;
     padding: 10px;
-    position: relative; /* 별 아이콘의 절대 위치 설정을 위해 추가 */
+    position: relative;
 `;
 
 const Poster = styled.img`
@@ -111,7 +111,7 @@ const Star = styled(FaStar)`
     right: 10px;
     color: gold;
     font-size: 20px;
-    cursor: pointer; /* 클릭 가능하도록 커서 변경 */
+    cursor: pointer;
 `;
 
 const Search = () => {
@@ -123,28 +123,26 @@ const Search = () => {
     const [sortBy, setSortBy] = useState("popularity.desc");
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [wishlist, setWishlist] = useState([]); // 위시리스트 상태
+    const [wishlist, setWishlist] = useState([]);
 
     useEffect(() => {
         const fetchMovies = async () => {
+            const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
+            const options = {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
+                }
+            };
+
             try {
-                const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${currentPage}`, {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: `Bearer ${process.env.REACT_APP_ACCESS}`
-                    }
-                });
+                const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${currentPage}`, options);
                 setMovies(response.data.results);
                 setFilteredMovies(response.data.results);
                 setTotalPages(response.data.total_pages);
-                
+
                 // 장르 정보를 가져오기 위한 추가 API 요청
-                const genresResponse = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?language=ko-KR`, {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: `Bearer ${process.env.REACT_APP_ACCESS}`
-                    }
-                });
+                const genresResponse = await axios.get(`https://api.themoviedb.org/3/genre/movie/list?language=ko-KR`, options);
                 setGenres(genresResponse.data.genres);
             } catch (error) {
                 console.error(error);
@@ -203,7 +201,7 @@ const Search = () => {
     const handleToggleWishlist = (movie) => {
         const isWished = wishlist.some(wish => wish.id === movie.id);
         let updatedWishlist;
-        
+
         if (isWished) {
             updatedWishlist = wishlist.filter(wish => wish.id !== movie.id); // 제거
         } else {
@@ -251,7 +249,7 @@ const Search = () => {
                 </FilterContainer>
 
                 <TableView>
-                    {filteredMovies.slice(0, 8).map(movie => ( // 최대 8개 영화만 표시
+                    {filteredMovies.slice(0, 8).map(movie => (
                         <MovieCard key={movie.id}>
                             <Poster 
                                 src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
