@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import Loading from '../components/Loading';
 import Header from "../components/Header";
-import { FaTableCellsLarge, FaStar } from "react-icons/fa6";
+import { FaTableCellsLarge, FaStar } from 'react-icons/fa6';
 import { MdKeyboardDoubleArrowDown } from "react-icons/md";
 
-
 const SectionWrapper = styled.div`
-    width: calc(100%);
-    margin: 50px 0;
+    width: 100%;
+    height: ${(props) => (props.isInfinite ? '100%' : 'calc(100vh - 100px)')};
+    margin: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 `;
 
 const ViewSelector = styled.div`
     width: calc(80%);
     display: flex;
     justify-content: flex-end;
-    margin-bottom: 10px;
+    margin: 0;
     padding-right: 70px;
 `;
 
-const TableButton = styled((FaTableCellsLarge))`
+const TableButton = styled(FaTableCellsLarge)`
     background-color: #e13955;
     border: none;
     padding: 10px 15px;
@@ -39,7 +39,7 @@ const TableButton = styled((FaTableCellsLarge))`
     }
 `;
 
-const InfiniteButton = styled((MdKeyboardDoubleArrowDown))`
+const InfiniteButton = styled(MdKeyboardDoubleArrowDown)`
     background-color: #e13955;
     border: none;
     padding: 10px 15px;
@@ -59,11 +59,13 @@ const ContentContainer = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    width: calc(80%);
+    width: 80%;
+    height: 100%;
     padding: 20px;
+    overflow-y: auto; /* 내부 스크롤을 가능하게 함 */
 `;
 
-const TableView = styled.div`
+const TableViewContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -72,15 +74,23 @@ const TableView = styled.div`
     justify-content: center;
 `;
 
-const InfiniteView = styled(TableView)``;
+const InfiniteViewContainer = styled(TableViewContainer)``;
 
 const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: calc(20% - 20px);
+    width: calc((100% / 5) - 10px);
     flex-shrink: 0;
     position: relative;
+
+    @media (max-width: 768px) {
+        width: calc((100% / 4) - 10px);
+    }
+
+    @media (max-width: 480px) {
+        width: calc((100% / 2) - 10px);
+    }
 `;
 
 const Poster = styled.img`
@@ -116,9 +126,7 @@ const Star = styled(FaStar)`
     right: 10px;
     color: gold;
     font-size: 20px;
-    padding: 10px;
-    border-radius: 5px;
-    opacity: 0.5;
+    background-color: transparent;
 `;
 
 const Pagination = styled.div`
@@ -128,9 +136,24 @@ const Pagination = styled.div`
     margin-top: 20px;
 `;
 
-const PageInfo = styled.span`
-    margin: 0 10px;
+const Button = styled.button`
+    background-color: #e13955;
     color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 0 5px;
+
+    &:disabled {
+        background-color: gray;
+        cursor: not-allowed;
+    }
+`;
+
+const PageInfo = styled.span`
+    color: white;
+    margin: 0 10px;
 `;
 
 const TopButton = styled.button`
@@ -150,58 +173,33 @@ const TopButton = styled.button`
     }
 `;
 
-const Button = styled.button`
-    background-color: #e13955;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-
-    &.active {
-        background-color: #d12945;
-    }
-`;
-
-const LoadingSpinner = styled.div`
-    margin: 20px;
-    color: white;
-    text-align: center;
-`;
-
 const Popular = () => {
     const [movies, setMovies] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [page, setPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
     const [view, setView] = useState("table");
     const [hasMore, setHasMore] = useState(true);
     const [showTopButton, setShowTopButton] = useState(false);
-    const [loadingMore, setLoadingMore] = useState(false);
+    const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem('wishlist')) || []);
 
     useEffect(() => {
         const fetchMovies = async () => {
             setLoading(true);
-            try {
-                const password = localStorage.getItem('password'); // localStorage에서 비밀번호 가져오기
-                const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${page}`, {
-                    headers: {
-                        accept: 'application/json',
-                        Authorization: `Bearer ${password}` // localStorage의 비밀번호로 인증
-                    }
-                });
-                // 위시리스트 상태를 반영하여 영화 데이터 초기화
-                const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-                const updatedMovies = response.data.results.map(movie => ({
-                    ...movie,
-                    isWishlisted: wishlist.some(wish => wish.id === movie.id), // 위시리스트에 있는지 여부
-                }));
+            const password = localStorage.getItem('password');
+            let allMovies = [];
 
-                if (view === "table") {
-                    setMovies(updatedMovies);
-                } else {
-                    setMovies(prevMovies => [...prevMovies, ...updatedMovies]);
+            try {
+                for (let page = 1; page <= 20; page++) {
+                    const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${page}`, {
+                        headers: {
+                            accept: 'application/json',
+                            Authorization: `Bearer ${password}`
+                        }
+                    });
+                    allMovies = [...allMovies, ...response.data.results];
                 }
-                setHasMore(response.data.page < 20);
+                setMovies(allMovies);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
@@ -210,14 +208,69 @@ const Popular = () => {
         };
 
         fetchMovies();
-    }, [page, view]);
+    }, []);
+
+    useEffect(() => {
+        const updateItemsPerPage = () => {
+            const width = window.innerWidth;
+            if (width > 768) {
+                setItemsPerPage(10);
+            } else if (width > 650) {
+                setItemsPerPage(12);
+            } else {
+                setItemsPerPage(16);
+            }
+        };
+
+        updateItemsPerPage();
+        window.addEventListener('resize', updateItemsPerPage);
+        return () => window.removeEventListener('resize', updateItemsPerPage);
+    }, []);
+
+    const handleAddToWishlist = (movie) => {
+        const isInWishlist = wishlist.some(wish => wish.id === movie.id);
+        if (!isInWishlist) {
+            const updatedWishlist = [...wishlist, movie];
+            setWishlist(updatedWishlist);
+            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+        } else {
+            const updatedWishlist = wishlist.filter(wish => wish.id !== movie.id);
+            setWishlist(updatedWishlist);
+            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
+        }
+    };
+
+    const isMovieInWishlist = (movie) => {
+        return wishlist.some(wish => wish.id === movie.id);
+    };
+
+    const currentMovies = movies.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    const totalPages = Math.ceil(movies.length / itemsPerPage);
+
+    const handleNextPage = () => {
+        if (currentPage < totalPages) {
+            setCurrentPage(prev => prev + 1);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            setCurrentPage(prev => prev - 1);
+        }
+    };
 
     const handleViewChange = (newView) => {
         if (newView !== view) {
             setView(newView);
-            setPage(1);
-            setMovies([]);
+            setCurrentPage(1);
         }
+    };
+
+    const handleScroll = () => {
+        if (view === "infinite" && window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+            handleNextPage();
+        }
+        setShowTopButton(window.scrollY > 300); // 300px 이상 스크롤 시 Top 버튼 표시
     };
 
     const scrollToTop = () => {
@@ -225,121 +278,67 @@ const Popular = () => {
     };
 
     useEffect(() => {
-        const toggleTopButton = () => {
-            if (window.scrollY > 200) {
-                setShowTopButton(true);
-            } else {
-                setShowTopButton(false);
-            }
-        };
-        window.addEventListener('scroll', toggleTopButton);
-        return () => window.removeEventListener('scroll', toggleTopButton);
-    }, []);
-
-    const handleScroll = () => {
-        if (view === "infinite" && window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && hasMore) {
-            handleNextPage();
-        }
-    };
-
-    useEffect(() => {
         window.addEventListener('scroll', handleScroll);
-        return () => {
-            window.removeEventListener('scroll', handleScroll);
-        };
-    }, [hasMore, view]);
-
-    const handleNextPage = () => {
-        if (page < 50 && hasMore) {
-            setLoadingMore(true);
-            setPage((prev) => prev + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (page > 1) {
-            setPage((prev) => prev - 1);
-        }
-    };
-
-    const handleAddToWishlist = (movie) => {
-        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-        if (!wishlist.find(wish => wish.id === movie.id)) {
-            const updatedWishlist = [...wishlist, movie];
-            localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-            setMovies(prevMovies => 
-                prevMovies.map(m => 
-                    m.id === movie.id ? { ...m, isWishlisted: true } : m
-                )
-            ); // 상태 업데이트
-        } else {
-            handleRemoveFromWishlist(movie.id); // 이미 있는 경우 제거
-        }
-    };
-
-    const handleRemoveFromWishlist = (movieId) => {
-        const wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
-        const updatedWishlist = wishlist.filter(movie => movie.id !== movieId);
-        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-        setMovies(prevMovies => 
-            prevMovies.map(m => 
-                m.id === movieId ? { ...m, isWishlisted: false } : m
-            )
-        ); // 상태 업데이트
-    };
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [view]);
 
     return (
         <>
             <Header />
-            <SectionWrapper>
+            <SectionWrapper isInfinite={view === "infinite"}>
                 <ViewSelector>
-                    <TableButton onClick={() => handleViewChange("table")} className={view === "table" ? "active" : ""}/>
+                    <TableButton onClick={() => handleViewChange("table")} className={view === "table" ? "active" : ""} />
                     <InfiniteButton onClick={() => handleViewChange("infinite")} className={view === "infinite" ? "active" : ""}>Infinite Scroll</InfiniteButton>
                 </ViewSelector>
 
                 <ContentContainer>
-                    {loading && <Loading />}
-                    {view === "table" ? (
-                        <TableView>
-                            {movies.map(movie => (
-                                <Wrapper key={movie.id}>
-                                    <Poster 
-                                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                                        alt={movie.title}
-                                        onClick={() => handleAddToWishlist(movie)} // 위시리스트 추가/제거
-                                    />
-                                    {movie.isWishlisted && <Star onClick={() => handleRemoveFromWishlist(movie.id)} />} {/* 위시리스트에 있으면 별 아이콘 표시 */}
-                                    <Title>{movie.title.length > 20 ? `${movie.title.substring(0, 20)}...` : movie.title}</Title>
-                                </Wrapper>
-                            ))}
-                        </TableView>
+                    {loading ? (
+                        <p style={{color: 'white', font:'bold 20px arial'}}>Loading...</p>
                     ) : (
-                        <InfiniteView>
-                            {movies.map(movie => (
-                                <Wrapper key={movie.id}>
-                                    <Poster 
-                                        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
-                                        alt={movie.title}
-                                        onClick={() => handleAddToWishlist(movie)} // 위시리스트 추가/제거
-                                    />
-                                    {movie.isWishlisted && <Star onClick={() => handleRemoveFromWishlist(movie.id)} />} {/* 위시리스트에 있으면 별 아이콘 표시 */}
-                                    <Title>{movie.title.length > 20 ? `${movie.title.substring(0, 20)}...` : movie.title}</Title>
-                                </Wrapper>
-                            ))}
-                            {loadingMore && <LoadingSpinner>Loading...</LoadingSpinner>}
-                        </InfiniteView>
+                        <>
+                            {view === "table" ? (
+                                <TableViewContainer>
+                                    {currentMovies.map((movie) => (
+                                        <Wrapper key={movie.id}>
+                                            <Star style={{ display: isMovieInWishlist(movie) ? 'block' : 'none' }} />
+                                            <Poster 
+                                                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                                                alt={movie.title}
+                                                onClick={() => handleAddToWishlist(movie)} // 위시리스트 추가/제거
+                                            />
+                                            <Title>{movie.title}</Title>
+                                        </Wrapper>
+                                    ))}
+                                </TableViewContainer>
+                            ) : (
+                                <InfiniteViewContainer>
+                                    {movies.map((movie) => (
+                                        <Wrapper key={movie.id}>
+                                            <Star style={{ display: isMovieInWishlist(movie) ? 'block' : 'none' }} />
+                                            <Poster 
+                                                src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} 
+                                                alt={movie.title}
+                                                onClick={() => handleAddToWishlist(movie)} // 위시리스트 추가/제거
+                                            />
+                                            <Title>{movie.title}</Title>
+                                        </Wrapper>
+                                    ))}
+                                </InfiniteViewContainer>
+                            )}
+                        </>
+                    )}
+                    {view === "table" && (
+                        <Pagination>
+                            <Button onClick={handlePreviousPage} disabled={currentPage === 1}>이전</Button>
+                            <PageInfo>{currentPage} / {totalPages}</PageInfo>
+                            <Button onClick={handleNextPage} disabled={currentPage === totalPages}>다음</Button>
+                        </Pagination>
                     )}
                 </ContentContainer>
 
-                {view === "table" && (
-                    <Pagination>
-                        <Button onClick={handlePreviousPage} disabled={page === 1}>이전</Button>
-                        <PageInfo>{page} / 20</PageInfo>
-                        <Button onClick={handleNextPage} disabled={page === 20}>다음</Button>
-                    </Pagination>
+                {view === "infinite" && (
+                    <TopButton className={showTopButton ? "visible" : ""} onClick={scrollToTop}>Top</TopButton>
                 )}
-
-                <TopButton className={showTopButton ? "visible" : ""} onClick={scrollToTop}>Top</TopButton>
             </SectionWrapper>
         </>
     );
