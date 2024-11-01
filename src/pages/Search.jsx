@@ -20,6 +20,9 @@ const FilterContainer = styled.div`
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
+    @media screen and (max-width: 768px) {
+        width: 100%;
+    }
 `;
 
 const FilterGroup = styled.div`

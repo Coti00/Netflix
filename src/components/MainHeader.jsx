@@ -162,7 +162,6 @@ const MainHeader = () => {
                     <Title>{selectedMovie.title}</Title>
                     <Info>{selectedMovie.overview}</Info>
                     <Button>재생</Button>
-                    <Button className="info">상세 정보</Button>
                 </ContentWrapper>
             </Wrapper>
         </SectionWrapper>
