@@ -4,6 +4,7 @@ import axios from "axios";
 import Header from "../components/Header";
 import { FaTableCellsLarge, FaStar } from 'react-icons/fa6';
 import { MdKeyboardDoubleArrowDown } from "react-icons/md";
+import Loading from '../components/Loading';
 
 const SectionWrapper = styled.div`
     width: 100%;
@@ -179,12 +180,12 @@ const Popular = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [view, setView] = useState("table");
-    const [hasMore, setHasMore] = useState(true);
     const [showTopButton, setShowTopButton] = useState(false);
     const [wishlist, setWishlist] = useState(JSON.parse(localStorage.getItem('wishlist')) || []);
 
+    // TableView 전용 데이터 가져오기 함수
     useEffect(() => {
-        const fetchMovies = async () => {
+        const fetchAllMoviesForTable = async () => {
             setLoading(true);
             const password = localStorage.getItem('password');
             let allMovies = [];
@@ -207,9 +208,59 @@ const Popular = () => {
             }
         };
 
-        fetchMovies();
-    }, []);
+        if (view === "table") fetchAllMoviesForTable();
+    }, [view]);
 
+    // InfiniteView 전용 데이터 가져오기 함수
+const fetchMoviesForInfiniteView = async (page) => {
+        const password = localStorage.getItem('password');
+        setLoading(true);
+        try {
+            const response = await axios.get(`https://api.themoviedb.org/3/movie/popular?language=ko-KR&page=${page}`, {
+                headers: {
+                    accept: 'application/json',
+                    Authorization: `Bearer ${password}`
+                }
+            });
+            setMovies((prevMovies) => [...prevMovies, ...response.data.results]);
+            setLoading(false);
+        } catch (error) {
+            console.error(error);
+            setLoading(false);
+        }
+    };
+
+    // InfiniteView에서만 스크롤이 하단에 닿을 때 추가 페이지 데이터 로드
+    useEffect(() => {
+        if (view === "infinite" && currentPage === 1) {
+            fetchMoviesForInfiniteView(currentPage);
+        }
+    }, [currentPage, view]);
+
+
+    // InfiniteView에서만 스크롤이 하단에 닿을 때 추가 페이지 데이터 로드
+    useEffect(() => {
+        if (view === "infinite" && currentPage > 1) {
+            fetchMoviesForInfiniteView(currentPage);
+        }
+    }, [currentPage, view]);
+
+    // InfiniteView에서만 스크롤 이벤트 설정
+    useEffect(() => {
+        const handleInfiniteScroll = () => {
+            if (view === "infinite" && window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !loading) {
+                setCurrentPage((prevPage) => prevPage + 1);
+            }
+            setShowTopButton(window.scrollY > 300);
+        };
+
+        if (view === "infinite") {
+            window.addEventListener("scroll", handleInfiniteScroll);
+            return () => window.removeEventListener("scroll", handleInfiniteScroll);
+        }
+    }, [view, loading]);
+
+    // 화면 크기에 따라 itemsPerPage 값 변경
     useEffect(() => {
         const updateItemsPerPage = () => {
             const width = window.innerWidth;
@@ -248,21 +299,14 @@ const Popular = () => {
     const totalPages = Math.ceil(movies.length / itemsPerPage);
 
     const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(prev => prev + 1);
-        }
-    };
-
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(prev => prev - 1);
-        }
+        setCurrentPage((prevPage) => prevPage + 1);
     };
 
     const handleViewChange = (newView) => {
         if (newView !== view) {
             setView(newView);
             setCurrentPage(1);
+            setMovies([]); // 새 뷰로 전환 시 목록 초기화
         }
     };
 
@@ -275,12 +319,17 @@ const Popular = () => {
 
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        setCurrentPage(1); // 스크롤 초기화
+        setMovies([]); // 기존 데이터 초기화
+        if (view === "infinite") {
+            fetchMoviesForInfiniteView(1); // InfiniteView 첫 페이지 로드
+        }
     };
 
     useEffect(() => {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
-    }, [view]);
+    }, [view, currentPage]);
 
     return (
         <>
@@ -293,7 +342,7 @@ const Popular = () => {
 
                 <ContentContainer>
                     {loading ? (
-                        <p style={{color: 'white', font:'bold 20px arial'}}>Loading...</p>
+                        <Loading/>
                     ) : (
                         <>
                             {view === "table" ? (
@@ -329,7 +378,7 @@ const Popular = () => {
                     )}
                     {view === "table" && (
                         <Pagination>
-                            <Button onClick={handlePreviousPage} disabled={currentPage === 1}>이전</Button>
+                            <Button onClick={() => setCurrentPage(prev => prev - 1)} disabled={currentPage === 1}>이전</Button>
                             <PageInfo>{currentPage} / {totalPages}</PageInfo>
                             <Button onClick={handleNextPage} disabled={currentPage === totalPages}>다음</Button>
                         </Pagination>
