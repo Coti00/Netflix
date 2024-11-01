@@ -38,6 +38,7 @@
     npm run build(배포할때 사용)
 
 ## 📂 프로젝트 주요구조 설명
+```bash
 netflix-clone/
 ├── src
 │   ├── approutes
@@ -57,6 +58,7 @@ netflix-clone/
 │       ├── Signin                 # 로그인 페이지
 │       └── Whishlist              # 위시리스트 페이지         
 └── README.md                       # 프로젝트 설명 파일
+```
 
 ## 📝 참고 사항
 이 프로젝트는 교육 목적으로 만들어졌으며 상업적 용도로 사용되지 않습니다.
