@@ -74,6 +74,7 @@ const MovieCard = styled.div`
 
 const Poster = styled.img`
     width: 80%;
+    height: calc(100% - 50px);
     border-radius: 5px;
     &:hover{
         transform: scale(1.05); 
@@ -89,10 +90,17 @@ const Title = styled.p`
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 1;
-    background: transparent;
     font: bold 13px 'arial';
+    background: transparent;
     @media screen and (min-width: 768px) {
         font: bold 15px 'arial';
+    }
+    &.overview{
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        background: transparent;
     }
 `;
 
@@ -131,6 +139,81 @@ const Star = styled(FaStar)`
     cursor: pointer;
 `;
 
+const Content = styled.div`
+    display: ${(props) => (props.visible ? "flex" : "none")};
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    background-color: white;
+    border-radius: 5px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    bottom: 0;
+`;
+
+const DetailButton = styled.button`
+    background-color: #e13955;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 80%;
+    font: bold 13px 'arial';
+    z-index: 2;
+    &:hover {
+        background-color: #c82c45;
+    }
+    @media screen and (max-width: 768px) {
+        font: bold 7px 'arial';
+    }
+`;
+
+const P = styled.p`
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    font: bold 13px 'arial';
+    &.title{
+        font: bold 18px 'arial';
+        color: #c82c45;
+        margin-bottom: 20px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 1;
+        @media screen and (max-width: 768px) {
+            font: bold 10px 'arial';
+            margin-bottom: 10px;
+        }
+    }
+    &.vote{
+        margin-bottom: 10px;
+        @media screen and (max-width: 768px) {
+            font: bold 7px 'arial';
+        }
+    }
+    &.overview{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 7;
+        margin-inline: 10px;
+        margin-bottom: 50px;
+        @media screen and (max-width: 768px) {
+            -webkit-line-clamp: 4;
+            font: bold 7px 'arial';
+            margin-bottom: 20px;
+        }
+    }
+`
+
 const Search = () => {
     const [movies, setMovies] = useState([]);
     const [filteredMovies, setFilteredMovies] = useState([]);
@@ -140,6 +223,7 @@ const Search = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [wishlist, setWishlist] = useState([]);
+    const [contentVisible, setContentVisible] = useState({}); // 상세 정보 보기 상태 관리
 
     // 장르 ID 정의
     const genreOptions = [
@@ -198,6 +282,13 @@ const Search = () => {
         }
 
         setFilteredMovies(filtered);
+    };
+
+    const handleToggleContent = (id) => {
+        setContentVisible(prevVisible => ({
+            ...prevVisible,
+            [id]: !prevVisible[id]
+        }));
     };
 
     const handleReset = () => {
@@ -283,6 +374,14 @@ const Search = () => {
                                 style={{ display: wishlist.some(wish => wish.id === movie.id) ? 'block' : 'none' }} // 위시리스트에 있으면 별 아이콘 표시
                             />
                             <Title>{movie.title.length > 20 ? `${movie.title.substring(0, 20)}...` : movie.title}</Title>
+                            <DetailButton onClick={() => handleToggleContent(movie.id)}>
+                                정보보기
+                            </DetailButton>
+                            <Content visible={contentVisible[movie.id]}>
+                                <P className="title">{movie.title}</P>
+                                <P className="vote">평점: {movie.vote_average} / 10</P>
+                                <P className="overview">{movie.overview}</P>
+                            </Content>
                         </MovieCard>
                     ))}
                 </TableView>
